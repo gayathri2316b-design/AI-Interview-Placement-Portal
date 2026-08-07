@@ -1,0 +1,42 @@
+Table User {
+  user_id int [pk, increment]
+  name varchar
+  email varchar [unique]
+  password varchar
+  role varchar
+}
+
+Table Question {
+  question_id int [pk, increment]
+  title varchar
+  category varchar
+  difficulty varchar
+}
+
+Table Result {
+  result_id int [pk, increment]
+  score int
+  date date
+  user_id int
+  question_id int
+}
+
+Table Resume {
+  resume_id int [pk, increment]
+  file_name varchar
+  feedback text
+  user_id int
+}
+
+Table MockInterview {
+  interview_id int [pk, increment]
+  score int
+  feedback text
+  user_id int
+}
+
+Ref: Result.user_id > User.user_id
+Ref: Result.question_id > Question.question_id
+Ref: Resume.user_id > User.user_id
+Ref: MockInterview.user_id > User.user_id
+
