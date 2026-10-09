@@ -1,3 +1,4 @@
+
 # ===============================
 # Node Modules
 # ===============================
@@ -6,15 +7,26 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-
 # ===============================
-# Environment Variables
+# Environment Variables & Secrets
 # ===============================
 .env
-.env.local
-.env.development
-.env.production
+.env.*
+!.env.example
 
+# ===============================
+# Python Virtual Environments
+# ===============================
+venv/
+.venv/
+env/
+
+# ===============================
+# Python Generated Files
+# ===============================
+__pycache__/
+*.py[cod]
+*.pyo
 
 # ===============================
 # Build Files
@@ -22,13 +34,11 @@ yarn-error.log*
 dist/
 build/
 
-
 # ===============================
 # Logs
 # ===============================
 logs/
 *.log
-
 
 # ===============================
 # Backend Uploads
@@ -36,13 +46,12 @@ logs/
 uploads/
 public/uploads/
 
-
 # ===============================
 # Database Files
 # ===============================
 *.sqlite
+*.sqlite3
 *.db
-
 
 # ===============================
 # IDE / Editor Files
@@ -51,19 +60,20 @@ public/uploads/
 .idea/
 *.swp
 
-
 # ===============================
 # Operating System Files
 # ===============================
 .DS_Store
 Thumbs.db
-
+desktop.ini
 
 # ===============================
 # Testing Coverage
 # ===============================
 coverage/
-
+htmlcov/
+.pytest_cache/
+.mypy_cache/
 
 # ===============================
 # Temporary Files
@@ -71,18 +81,8 @@ coverage/
 tmp/
 temp/
 
-
 # ===============================
 # React Cache
 # ===============================
 .cache/
 .parcel-cache/
-
-
-# ===============================
-# Python (if AI module uses Python)
-# ===============================
-__pycache__/
-*.pyc
-venv/
-env/
