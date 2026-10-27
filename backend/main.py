@@ -7,9 +7,13 @@ from jose import jwt, JWTError
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from backend.database import engine, SessionLocal
-from backend.models import User
+from backend.models import User,Question
 from backend.schemas import UserCreate, UserLogin
 
+
+from fastapi.middleware.cors import CORSMiddleware
+
+from pydantic import BaseModel
 
 SECRET_KEY = "replace-this-with-a-random-secret-key"
 ALGORITHM = "HS256"
@@ -17,6 +21,25 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
 app = FastAPI(title="AI Interview Placement Portal")
+
+
+class AnswerSubmission(BaseModel):
+    answer: str
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+        
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 pwd_context = CryptContext(
@@ -210,3 +233,75 @@ def login(
         "user_id": existing_user.user_id,
         "name": existing_user.name
     }
+
+@app.get("/api/questions")
+def get_questions(db: Session = Depends(get_db)):
+    questions = db.query(Question).all()
+
+    return [
+        {
+            "ques_id": q.ques_id,
+            "category_id": q.category_id,
+            "ques_txt": q.ques_txt,
+            "difficulty": q.difficulty
+        }
+        for q in questions
+    ]
+    
+    
+@app.post("/api/questions/{ques_id}/check")
+def check_answer(
+    ques_id: int,
+    submission: AnswerSubmission,
+    db: Session = Depends(get_db)
+):
+    question = db.query(Question).filter(
+        Question.ques_id == ques_id
+    ).first()
+
+    if question is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Question not found"
+        )
+
+    is_correct = (
+        submission.answer.strip().lower()
+        == question.crt_ans.strip().lower()
+    )
+
+    return {
+        "ques_id": ques_id,
+        "is_correct": is_correct,
+        "message": (
+            "Correct answer!"
+            if is_correct
+            else "Incorrect answer. Try again!"
+        )
+    }
+    
+    
+@app.get("/api/test-questions")
+def get_test_questions(db: Session = Depends(get_db)):
+    questions = db.query(Question).filter(
+        Question.option_a.isnot(None),
+        Question.option_b.isnot(None),
+        Question.option_c.isnot(None),
+        Question.option_d.isnot(None)
+    ).order_by(Question.ques_id).all()
+
+    return [
+        {
+            "ques_id": q.ques_id,
+            "category_id": q.category_id,
+            "ques_txt": q.ques_txt,
+            "difficulty": q.difficulty,
+            "options": [
+                q.option_a,
+                q.option_b,
+                q.option_c,
+                q.option_d
+            ]
+        }
+        for q in questions
+    ]
